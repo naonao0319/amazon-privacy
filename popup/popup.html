@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon プライバシーガード</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- ヘッダー -->
+    <div class="popup-header">
+      <div class="header-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1zm0 2.18l7 3.12v5.7c0 4.83-3.4 9.07-7 10.2-3.6-1.13-7-5.37-7-10.2V6.3l7-3.12zM11 7v2h2V7h-2zm0 4v6h2v-6h-2z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1>プライバシーガード</h1>
+        <p class="subtitle">Amazon 個人情報保護</p>
+      </div>
+    </div>
+
+    <!-- メイントグル -->
+    <div class="toggle-section">
+      <div class="toggle-row">
+        <span class="toggle-label">モザイク保護</span>
+        <label class="toggle-switch" id="toggle-enabled">
+          <input type="checkbox" id="cb-enabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p class="status-text" id="status-text">🛡️ 保護中</p>
+    </div>
+
+    <!-- ぼかし強度スライダー -->
+    <div class="slider-section">
+      <div class="slider-header">
+        <span class="slider-label">ぼかし強度</span>
+        <span class="slider-value" id="blur-value">5px</span>
+      </div>
+      <input type="range" id="blur-slider" min="1" max="15" value="5" class="blur-slider">
+      <div class="slider-range">
+        <span>弱</span>
+        <span>強</span>
+      </div>
+    </div>
+
+    <!-- 保護対象設定 -->
+    <div class="options-section">
+      <div class="section-title">保護対象</div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-icon">📍</span>
+          <span class="option-label">住所・名前</span>
+        </div>
+        <span class="option-badge always">常時ON</span>
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-icon">📧</span>
+          <span class="option-label">メールアドレス</span>
+        </div>
+        <label class="toggle-switch small">
+          <input type="checkbox" id="cb-blur-email" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-icon">📞</span>
+          <span class="option-label">電話番号</span>
+        </div>
+        <label class="toggle-switch small">
+          <input type="checkbox" id="cb-blur-phone" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-icon">💳</span>
+          <span class="option-label">カード情報</span>
+        </div>
+        <label class="toggle-switch small">
+          <input type="checkbox" id="cb-blur-payment" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- その他オプション -->
+    <div class="options-section">
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-icon">👆</span>
+          <span class="option-label">ホバーで一時解除</span>
+        </div>
+        <label class="toggle-switch small">
+          <input type="checkbox" id="cb-hover-reveal" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- フッター -->
+    <div class="popup-footer">
+      <p>Amazon プライバシーガード v1.2</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
