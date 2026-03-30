@@ -27,6 +27,14 @@
   filter: blur(0) !important;
 }
 
+/* --- サイドメニュー（すべて）: ユーザー名ホバー解除 --- */
+#hmenu-customer-profile:hover,
+#hmenu-customer-profile-link:hover,
+#hmenu-customer-profile-right:hover,
+#hmenu-customer-name:hover {
+  filter: blur(0) !important;
+}
+
 /* --- 商品ページ: お届け先ホバー解除 --- */
 #contextualIngressPt:hover,
 #contextualIngressPtLabel:hover,
@@ -42,6 +50,10 @@ body.privacy-guard-disabled #glow-ingress-line2,
 body.privacy-guard-disabled #glow-ingress-block,
 body.privacy-guard-disabled #nav-global-location-popover-link span,
 body.privacy-guard-disabled #nav-link-accountList-nav-line-1,
+body.privacy-guard-disabled #hmenu-customer-profile,
+body.privacy-guard-disabled #hmenu-customer-profile-link,
+body.privacy-guard-disabled #hmenu-customer-profile-right,
+body.privacy-guard-disabled #hmenu-customer-name,
 body.privacy-guard-disabled #contextualIngressPt,
 body.privacy-guard-disabled #contextualIngressPtLabel,
 body.privacy-guard-disabled #contextualIngressPtLabel_deliveryShortLine,

@@ -23,6 +23,11 @@
     '#nav-global-location-popover-link span',
     // ヘッダー: ユーザー名
     '#nav-link-accountList-nav-line-1',
+    // サイドメニュー（すべて）: ユーザー名
+    '#hmenu-customer-profile',
+    '#hmenu-customer-profile-link',
+    '#hmenu-customer-profile-right',
+    '#hmenu-customer-name',
     // 商品ページ: 右パネルのお届け先
     '#contextualIngressPt',
     '#contextualIngressPtLabel',
