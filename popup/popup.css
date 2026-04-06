@@ -1,5 +1,5 @@
 /* ============================================
-   Amazon プライバシーガード - Popup CSS v1.2
+   Amazon プライバシーガード - Popup CSS v1.4
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
@@ -281,4 +281,37 @@ input:focus + .toggle-slider {
 .popup-footer p {
   font-size: 10px;
   color: #484f58;
+}
+
+/* --- ネタ機能セクション --- */
+.neta-section {
+  background: rgba(234, 179, 8, 0.03);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.12);
+}
+
+.neta-title {
+  color: #eab308 !important;
+  letter-spacing: 1.5px;
+}
+
+.neta-description {
+  font-size: 10px;
+  color: #7d8590;
+  margin-top: 4px;
+  padding-left: 28px;
+  font-style: italic;
+}
+
+input:checked + .neta-slider {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important;
+}
+
+.status-text.neta-active {
+  color: #eab308;
+  animation: neta-pulse 2s ease-in-out infinite;
+}
+
+@keyframes neta-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }

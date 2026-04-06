@@ -1,5 +1,5 @@
 /**
- * Amazon プライバシーガード - Popup Script v1.2
+ * Amazon プライバシーガード - Popup Script v1.4
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cbBlurEmail = document.getElementById('cb-blur-email');
   const cbBlurPhone = document.getElementById('cb-blur-phone');
   const cbBlurPayment = document.getElementById('cb-blur-payment');
+  const cbWhiteHouse = document.getElementById('cb-white-house');
   const blurSlider = document.getElementById('blur-slider');
   const blurValue = document.getElementById('blur-value');
   const statusText = document.getElementById('status-text');
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       blurEmail: true,
       blurPhone: true,
       blurPayment: true,
+      whiteHouseMode: false,
     },
     (settings) => {
       cbEnabled.checked = settings.enabled;
@@ -28,9 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
       cbBlurEmail.checked = settings.blurEmail;
       cbBlurPhone.checked = settings.blurPhone;
       cbBlurPayment.checked = settings.blurPayment;
+      cbWhiteHouse.checked = settings.whiteHouseMode;
       blurSlider.value = settings.blurLevel;
       blurValue.textContent = `${settings.blurLevel}px`;
-      updateStatusText(settings.enabled);
+      updateStatusText(settings.enabled, settings.whiteHouseMode);
     }
   );
 
@@ -38,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cbEnabled.addEventListener('change', () => {
     const enabled = cbEnabled.checked;
     chrome.storage.sync.set({ enabled });
-    updateStatusText(enabled);
+    updateStatusText(enabled, cbWhiteHouse.checked);
   });
 
   // ホバー解除トグル
@@ -68,16 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.sync.set({ blurLevel: level });
   });
 
+  // ホワイトハウスモードトグル
+  cbWhiteHouse.addEventListener('change', () => {
+    const whMode = cbWhiteHouse.checked;
+    chrome.storage.sync.set({ whiteHouseMode: whMode });
+    updateStatusText(cbEnabled.checked, whMode);
+  });
+
   /**
    * ステータスのテキストを更新
    */
-  function updateStatusText(enabled) {
-    if (enabled) {
-      statusText.textContent = '🛡️ 保護中';
+  function updateStatusText(enabled, whMode) {
+    if (whMode) {
+      statusText.textContent = '🏠 ホワイトハウスモード';
       statusText.classList.remove('disabled');
+      statusText.classList.add('neta-active');
+    } else if (enabled) {
+      statusText.textContent = '🛡️ 保護中';
+      statusText.classList.remove('disabled', 'neta-active');
     } else {
       statusText.textContent = '⚠️ 無効';
       statusText.classList.add('disabled');
+      statusText.classList.remove('neta-active');
     }
   }
 });

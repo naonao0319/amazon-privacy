@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Amazon プライバシーガード",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Amazonサイト上の住所・名前・メール・電話番号・カード情報などの個人情報にモザイクをかけて保護します",
   "permissions": ["storage"],
   "icons": {

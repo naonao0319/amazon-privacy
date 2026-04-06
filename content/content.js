@@ -1,5 +1,5 @@
 /**
- * Amazon プライバシーガード - Content Script v1.2
+ * Amazon プライバシーガード - Content Script v1.4
  * 住所・名前・メールアドレス・電話番号・カード情報などの個人情報にモザイク（ぼかし）をかける
  * 
  * アプローチ:
@@ -100,9 +100,38 @@
   // デフォルト設定
   let isEnabled = true;
   let blurLevel = 5;
+  let hoverReveal = true;
   let blurEmail = true;
   let blurPhone = true;
   let blurPayment = true;
+  let whiteHouseMode = false;
+
+  // ホワイトハウス住所
+  const WHITE_HOUSE_ADDRESS = {
+    full: '1600 Pennsylvania Avenue NW, Washington, DC 20500, United States',
+    name: 'Barack Obama',
+    phone: '(202) 456-1111',
+    email: 'president@whitehouse.gov',
+    postalCode: '20500',
+    lines: [
+      '1600 Pennsylvania Avenue NW',
+      'Washington, DC 20500',
+      'United States of America',
+    ],
+    jp: {
+      full: '〒100-0001 ワシントンD.C. ペンシルベニア通り1600番地',
+      name: 'ホワイトハウス太郎',
+      phone: '+1-202-456-1111',
+      postalCode: '100-0001',
+      lines: [
+        'ワシントンD.C.',
+        'ペンシルベニア通り1600番地',
+        'ホワイトハウス',
+      ],
+    },
+  };
+
+  const REPLACED_ATTR = 'data-wh-original';
 
   // テキスト検出パターン
   const PATTERNS = {
@@ -126,13 +155,16 @@
           blurEmail: true,
           blurPhone: true,
           blurPayment: true,
+          whiteHouseMode: false,
         },
         (settings) => {
           isEnabled = settings.enabled;
           blurLevel = settings.blurLevel;
+          hoverReveal = settings.hoverReveal;
           blurEmail = settings.blurEmail;
           blurPhone = settings.blurPhone;
           blurPayment = settings.blurPayment;
+          whiteHouseMode = settings.whiteHouseMode;
           applyAll();
         }
       );
@@ -145,9 +177,17 @@
         if (area === 'sync') {
           if (changes.enabled !== undefined) isEnabled = changes.enabled.newValue;
           if (changes.blurLevel !== undefined) blurLevel = changes.blurLevel.newValue;
+          if (changes.hoverReveal !== undefined) hoverReveal = changes.hoverReveal.newValue;
           if (changes.blurEmail !== undefined) blurEmail = changes.blurEmail.newValue;
           if (changes.blurPhone !== undefined) blurPhone = changes.blurPhone.newValue;
           if (changes.blurPayment !== undefined) blurPayment = changes.blurPayment.newValue;
+          if (changes.whiteHouseMode !== undefined) {
+            const oldMode = whiteHouseMode;
+            whiteHouseMode = changes.whiteHouseMode.newValue;
+            if (!whiteHouseMode && oldMode) {
+              restoreAllOriginalText();
+            }
+          }
           applyAll();
         }
       });
@@ -374,18 +414,221 @@
     });
   }
 
+  // ========================================
+  // ホワイトハウスモード（ネタ機能）
+  // ========================================
+
+  /**
+   * テキストノードの内容をホワイトハウス住所に置き換える
+   */
+  function replaceWithWhiteHouse(el, replacementText) {
+    if (!el || el.hasAttribute(REPLACED_ATTR)) return;
+    el.setAttribute(REPLACED_ATTR, el.textContent);
+    el.textContent = replacementText;
+    el.classList.add('wh-replaced');
+  }
+
+  /**
+   * 元のテキストに復元する
+   */
+  function restoreOriginalText(el) {
+    if (!el || !el.hasAttribute(REPLACED_ATTR)) return;
+    el.textContent = el.getAttribute(REPLACED_ATTR);
+    el.removeAttribute(REPLACED_ATTR);
+    el.classList.remove('wh-replaced');
+  }
+
+  /**
+   * すべての置き換え済み要素を復元
+   */
+  function restoreAllOriginalText() {
+    document.querySelectorAll(`[${REPLACED_ATTR}]`).forEach((el) => {
+      restoreOriginalText(el);
+    });
+  }
+
+  /**
+   * 日本語サイトかどうか判定
+   */
+  function isJapaneseSite() {
+    return window.location.hostname.includes('amazon.co.jp');
+  }
+
+  /**
+   * ホワイトハウスモードの住所置き換え処理
+   */
+  function applyWhiteHouseMode() {
+    if (!whiteHouseMode) return;
+    const isJP = isJapaneseSite();
+
+    // ヘッダーのお届け先名前
+    const headerLine2 = document.querySelector('#glow-ingress-line2');
+    if (headerLine2) {
+      replaceWithWhiteHouse(headerLine2, isJP ? WHITE_HOUSE_ADDRESS.jp.name : WHITE_HOUSE_ADDRESS.name);
+      // ぼかしを解除（テキストを見せるため）
+      headerLine2.classList.remove(BLUR_CLASS);
+    }
+
+    // ヘッダーのユーザー名
+    const headerName = document.querySelector('#nav-link-accountList-nav-line-1');
+    if (headerName) {
+      const greeting = isJP ? 'こんにちは、ホワイトハウス太郎 さん' : 'Hello, Barack';
+      replaceWithWhiteHouse(headerName, greeting);
+      headerName.classList.remove(BLUR_CLASS);
+    }
+
+    // サイドメニューのユーザー名
+    ['#hmenu-customer-name', '#hmenu-customer-profile-right'].forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (el) {
+        replaceWithWhiteHouse(el, isJP ? 'ホワイトハウス太郎 さん' : 'Barack Obama');
+        el.classList.remove(BLUR_CLASS);
+      }
+    });
+
+    // 商品ページのお届け先
+    const deliveryLabel = document.querySelector('#contextualIngressPtLabel_deliveryShortLine');
+    if (deliveryLabel) {
+      const addr = isJP ? 'ワシントンD.C. 20500' : 'Washington DC 20500';
+      replaceWithWhiteHouse(deliveryLabel, addr);
+      deliveryLabel.classList.remove(BLUR_CLASS);
+    }
+
+    // 住所表示要素の置き換え
+    const addressDisplaySelectors = [
+      '.displayAddressDiv',
+      '.displayAddressUL',
+      '.shipping-address',
+      '.ship-to-address',
+      '.od-shipping-address-container',
+      '[data-component="shipToAddress"]',
+      '.order-address',
+      '#address-ui-widgets-FullAddressDisplay',
+    ];
+
+    addressDisplaySelectors.forEach((selector) => {
+      try {
+        document.querySelectorAll(selector).forEach((el) => {
+          if (el.hasAttribute(REPLACED_ATTR)) return;
+          const fullAddr = isJP
+            ? `${WHITE_HOUSE_ADDRESS.jp.name}\n${WHITE_HOUSE_ADDRESS.jp.lines.join('\n')}\n${WHITE_HOUSE_ADDRESS.jp.postalCode}`
+            : `${WHITE_HOUSE_ADDRESS.name}\n${WHITE_HOUSE_ADDRESS.lines.join('\n')}`;
+          replaceWithWhiteHouse(el, fullAddr);
+          el.classList.remove(BLUR_CLASS);
+          el.style.whiteSpace = 'pre-line';
+        });
+      } catch (e) { /* ignore */ }
+    });
+
+    // アドレス帳ページの住所カード
+    const path = window.location.pathname;
+    const isAddressPage =
+      path.includes('/a/addresses') ||
+      path.includes('/address/') ||
+      path.includes('/gp/css/account/address') ||
+      path.includes('/gp/your-account/address');
+
+    if (isAddressPage) {
+      document.querySelectorAll('.a-box').forEach((box) => {
+        const text = box.textContent;
+        if (
+          PATTERNS.postalCode.test(text) ||
+          PATTERNS.address.test(text) ||
+          PATTERNS.phone.test(text)
+        ) {
+          if (!box.hasAttribute(REPLACED_ATTR)) {
+            const addrBlock = isJP
+              ? `${WHITE_HOUSE_ADDRESS.jp.name}\n${WHITE_HOUSE_ADDRESS.jp.lines.join('\n')}\n〒${WHITE_HOUSE_ADDRESS.jp.postalCode}\n${WHITE_HOUSE_ADDRESS.jp.phone}`
+              : `${WHITE_HOUSE_ADDRESS.name}\n${WHITE_HOUSE_ADDRESS.lines.join('\n')}\n${WHITE_HOUSE_ADDRESS.phone}`;
+            replaceWithWhiteHouse(box, addrBlock);
+            box.classList.remove(BLUR_CLASS);
+            box.style.whiteSpace = 'pre-line';
+            box.style.padding = '12px';
+          }
+        }
+      });
+    }
+
+    // テキストウォークで住所パターンの個別テキストノードを置き換え
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      const text = textNode.textContent.trim();
+      if (!text || text.length > 300 || text.length < 3) continue;
+
+      const parentEl = textNode.parentElement;
+      if (!parentEl) continue;
+      if (parentEl.hasAttribute(REPLACED_ATTR)) continue;
+
+      const tagName = parentEl.tagName.toUpperCase();
+      if (tagName === 'SCRIPT' || tagName === 'STYLE' || tagName === 'NOSCRIPT') continue;
+
+      // お届け先ラベルの隣の値
+      if (text === 'お届け先' || text === 'Deliver to') {
+        let addressEl = parentEl.nextElementSibling;
+        if (addressEl && !addressEl.hasAttribute(REPLACED_ATTR)) {
+          replaceWithWhiteHouse(addressEl, isJP ? WHITE_HOUSE_ADDRESS.jp.name : WHITE_HOUSE_ADDRESS.name);
+          addressEl.classList.remove(BLUR_CLASS);
+        }
+      }
+
+      // 「お届け先:」パターン
+      if (/お届け先[：:]?\s*.+/.test(text) && text.length < 100) {
+        const replacement = isJP
+          ? `お届け先: ${WHITE_HOUSE_ADDRESS.jp.name}`
+          : `Deliver to: ${WHITE_HOUSE_ADDRESS.name}`;
+        replaceWithWhiteHouse(parentEl, replacement);
+        parentEl.classList.remove(BLUR_CLASS);
+      }
+
+      // メールアドレスの置き換え
+      if (PATTERNS.email.test(text) && text.length < 200) {
+        replaceWithWhiteHouse(parentEl, WHITE_HOUSE_ADDRESS.email);
+        parentEl.classList.remove(BLUR_CLASS);
+      }
+
+      // 電話番号の置き換え
+      if (PATTERNS.phone.test(text) && text.length < 50) {
+        if (/^\+?[\d\-\s()]+$/.test(text.replace(/電話|TEL|tel|Phone/gi, '').trim())) {
+          replaceWithWhiteHouse(parentEl, WHITE_HOUSE_ADDRESS.phone);
+          parentEl.classList.remove(BLUR_CLASS);
+        }
+      }
+    }
+  }
+
   /**
    * 全てのぼかし処理をまとめて実行
    */
   function applyAll() {
     updateDynamicStyle();
 
+    // ホバー解除の制御
+    if (hoverReveal) {
+      document.body.classList.remove('privacy-guard-no-hover');
+    } else {
+      document.body.classList.add('privacy-guard-no-hover');
+    }
+
     if (isEnabled) {
       document.body.classList.remove('privacy-guard-disabled');
-      blurKnownElements();
-      blurAddressTextElements();
+      if (whiteHouseMode) {
+        applyWhiteHouseMode();
+      } else {
+        blurKnownElements();
+        blurAddressTextElements();
+      }
     } else {
       document.body.classList.add('privacy-guard-disabled');
+      if (!whiteHouseMode) {
+        restoreAllOriginalText();
+      }
     }
   }
 
@@ -404,17 +647,23 @@
     const idHoverSelectors = BLUR_SELECTORS.map(s => s + ':hover').join(',\n        ');
 
     if (isEnabled) {
+      let hoverCSS = '';
+      if (hoverReveal) {
+        hoverCSS = `
+          .${BLUR_CLASS}:hover,
+          ${idHoverSelectors} {
+            filter: blur(0) !important;
+          }
+        `;
+      }
       dynamicStyle.textContent = `
         .${BLUR_CLASS},
         ${idSelectors} {
           filter: blur(${blurLevel}px) !important;
           transition: filter 0.3s ease !important;
-          cursor: pointer !important;
+          cursor: ${hoverReveal ? 'pointer' : 'default'} !important;
         }
-        .${BLUR_CLASS}:hover,
-        ${idHoverSelectors} {
-          filter: blur(0) !important;
-        }
+        ${hoverCSS}
       `;
     } else {
       dynamicStyle.textContent = `

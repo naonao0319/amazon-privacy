@@ -10,36 +10,36 @@
    JS側の動的スタイルシートでblur値が上書きされる
    =========================================== */
 
-/* --- ホバーで一時的に解除 --- */
-.privacy-guard-blur:hover {
+/* --- ホバーで一時的に解除（hoverReveal=ONの場合のみ） --- */
+body:not(.privacy-guard-no-hover) .privacy-guard-blur:hover {
   filter: blur(0) !important;
 }
 
 /* --- ヘッダー: お届け先住所のホバー解除 --- */
-#nav-global-location-popover-link:hover #glow-ingress-line1,
-#nav-global-location-popover-link:hover #glow-ingress-line2,
-#nav-global-location-popover-link:hover span {
+body:not(.privacy-guard-no-hover) #nav-global-location-popover-link:hover #glow-ingress-line1,
+body:not(.privacy-guard-no-hover) #nav-global-location-popover-link:hover #glow-ingress-line2,
+body:not(.privacy-guard-no-hover) #nav-global-location-popover-link:hover span {
   filter: blur(0) !important;
 }
 
 /* --- ヘッダー: ユーザー名ホバー解除 --- */
-#nav-link-accountList-nav-line-1:hover {
+body:not(.privacy-guard-no-hover) #nav-link-accountList-nav-line-1:hover {
   filter: blur(0) !important;
 }
 
 /* --- サイドメニュー（すべて）: ユーザー名ホバー解除 --- */
-#hmenu-customer-profile:hover,
-#hmenu-customer-profile-link:hover,
-#hmenu-customer-profile-right:hover,
-#hmenu-customer-name:hover {
+body:not(.privacy-guard-no-hover) #hmenu-customer-profile:hover,
+body:not(.privacy-guard-no-hover) #hmenu-customer-profile-link:hover,
+body:not(.privacy-guard-no-hover) #hmenu-customer-profile-right:hover,
+body:not(.privacy-guard-no-hover) #hmenu-customer-name:hover {
   filter: blur(0) !important;
 }
 
 /* --- 商品ページ: お届け先ホバー解除 --- */
-#contextualIngressPt:hover,
-#contextualIngressPtLabel:hover,
-#contextualIngressPtLabel_deliveryShortLine:hover,
-#contextualIngressPtLink:hover {
+body:not(.privacy-guard-no-hover) #contextualIngressPt:hover,
+body:not(.privacy-guard-no-hover) #contextualIngressPtLabel:hover,
+body:not(.privacy-guard-no-hover) #contextualIngressPtLabel_deliveryShortLine:hover,
+body:not(.privacy-guard-no-hover) #contextualIngressPtLink:hover {
   filter: blur(0) !important;
 }
 
@@ -59,4 +59,10 @@ body.privacy-guard-disabled #contextualIngressPtLabel,
 body.privacy-guard-disabled #contextualIngressPtLabel_deliveryShortLine,
 body.privacy-guard-disabled #contextualIngressPtLink {
   filter: none !important;
+}
+
+/* --- ホワイトハウスモード: 置き換え済み要素 --- */
+.wh-replaced {
+  filter: none !important;
+  transition: all 0.3s ease !important;
 }
